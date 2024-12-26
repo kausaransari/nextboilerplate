@@ -3,8 +3,11 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
+  --background: #f4f5fc;
   --foreground: #171717;
+  --primarycolor: #7438f2;
+  --headingcolor: #101452;
+  --textcolor: rgba(0, 0, 0, 0.88)
 }
 
 @media (prefers-color-scheme: dark) {
@@ -14,8 +17,23 @@
   }
 }
 
+@layer components {
+  .input {
+    @apply border border border-gray-300 focus:border-blue-500 outline-none;
+  }
+}
+
+html {
+  font-family: var(--font-poppins);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-montserrat);
+}
+
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
 }

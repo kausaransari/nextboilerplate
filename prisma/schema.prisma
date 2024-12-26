@@ -1,0 +1,151 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model category {
+  id           Int            @id @default(autoincrement())
+  name         String         @unique(map: "Category_name_key")
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime
+  description  String?
+  slug         String         @unique(map: "Category_slug_key")
+  postcategory postcategory[]
+}
+
+model page {
+  id          Int           @id @default(autoincrement())
+  title       String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime
+  description String?
+  slug        String        @unique(map: "Page_slug_key")
+  pagesection pagesection[]
+}
+
+model pagesection {
+  id        Int      @id @default(autoincrement())
+  pageId    Int
+  sectionId Int
+  position  Int
+  visible   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  page      page     @relation(fields: [pageId], references: [id], map: "PageSection_pageId_fkey")
+  section   section  @relation(fields: [sectionId], references: [id], map: "PageSection_sectionId_fkey")
+
+  @@unique([pageId, sectionId], map: "PageSection_pageId_sectionId_key")
+  @@index([sectionId], map: "PageSection_sectionId_fkey")
+}
+
+model post {
+  id            Int            @id @default(autoincrement())
+  title         String
+  slug          String         @unique(map: "Post_slug_key")
+  content       String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime
+  excerpt       String?
+  featuredImage String?
+  postcategory  postcategory[]
+  posttag       posttag[]
+}
+
+model postcategory {
+  id         Int      @id @default(autoincrement())
+  postId     Int
+  categoryId Int
+  category   category @relation(fields: [categoryId], references: [id], map: "PostCategory_categoryId_fkey")
+  post       post     @relation(fields: [postId], references: [id], map: "PostCategory_postId_fkey")
+
+  @@unique([postId, categoryId], map: "PostCategory_postId_categoryId_key")
+  @@index([categoryId], map: "PostCategory_categoryId_fkey")
+}
+
+model posttag {
+  id     Int  @id @default(autoincrement())
+  postId Int
+  tagId  Int
+  post   post @relation(fields: [postId], references: [id], map: "PostTag_postId_fkey")
+  tag    tag  @relation(fields: [tagId], references: [id], map: "PostTag_tagId_fkey")
+
+  @@unique([postId, tagId], map: "PostTag_postId_tagId_key")
+  @@index([tagId], map: "PostTag_tagId_fkey")
+}
+
+model role {
+  id   Int    @id @default(autoincrement())
+  name String @unique(map: "Role_name_key")
+  user user[]
+}
+
+model section {
+  id          Int           @id @default(autoincrement())
+  name        String        @unique(map: "Section_name_key")
+  type        section_type
+  content     String        @db.LongText
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime
+  pagesection pagesection[]
+}
+
+model session {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  token     String   @unique(map: "Session_token_key")  // Store the encrypted session ID
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  user      user     @relation(fields: [userId], references: [id], map: "Session_userId_fkey")
+
+  @@index([userId], map: "Session_userId_fkey")
+}
+
+model tag {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique(map: "Tag_name_key")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime
+  slug      String    @unique(map: "Tag_slug_key")
+  posttag   posttag[]
+}
+
+// model user {
+//   id        Int       @id @default(autoincrement())
+//   email     String    @unique(map: "User_email_key")
+//   password  String
+//   name      String?
+//   roleId    Int
+//   createdAt DateTime  @default(now())
+//   updatedAt DateTime
+//   session   session[]
+//   role      role      @relation(fields: [roleId], references: [id], map: "User_roleId_fkey")
+
+//   @@index([roleId], map: "User_roleId_fkey")
+// }
+
+model user {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique(map: "User_email_key")
+  password  String
+  name      String?
+  roleId    Int
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  session   session[]
+  role      role      @relation(fields: [roleId], references: [id], map: "User_roleId_fkey")
+
+  @@index([roleId], map: "User_roleId_fkey")
+}
+
+enum section_type {
+  HERO
+  GALLERY
+  SERVICES
+  TESTIMONIALS
+  CONTACT_FORM
+  BLOG_LIST
+}
